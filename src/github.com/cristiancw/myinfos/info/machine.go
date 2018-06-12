@@ -10,36 +10,28 @@ import (
 
 // Machine group informations about the machine and operational system.
 type Machine struct {
-	hostname     string
-	ipAddress    string
-	uptime       int64
-	runningSince int64
+	IPAddress    string `json:"ip_address"`
+	Hostname     string `json:"hostname"`
+	Uptime       int64  `json:"uptime"`
+	RunningSince int64  `json:"running_since"`
 }
 
 // LoadMachine load and keep loading every 5 seconds to update the informations about it.
-func LoadMachine(startTime time.Time, timeChan chan<- Machine) {
+func LoadMachine(startTime time.Time) {
 	for {
 		machine := Machine{
-			hostname:     getHostname(),
-			ipAddress:    getIP(),
-			uptime:       getUptime(),
-			runningSince: time.Since(startTime).Nanoseconds(),
+			IPAddress:    getIP(),
+			Hostname:     getHostname(),
+			Uptime:       getUptime(),                                      // In seconds
+			RunningSince: time.Since(startTime).Nanoseconds() / 1000000000, // In seconds
 		}
 
-		getIP()
-		timeChan <- machine
+		if err := SaveMachine(machine); err != nil {
+			log.Fatal(err)
+		}
 
 		time.Sleep(5 * time.Second)
 	}
-}
-
-func getHostname() string {
-	osName, err := os.Hostname()
-	if err != nil {
-		osName = "Unknown"
-		log.Fatal(err)
-	}
-	return osName
 }
 
 func getIP() string {
@@ -52,6 +44,15 @@ func getIP() string {
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 
 	return localAddr.IP.String()
+}
+
+func getHostname() string {
+	osName, err := os.Hostname()
+	if err != nil {
+		osName = "Unknown"
+		log.Fatal(err)
+	}
+	return osName
 }
 
 func getUptime() int64 {
