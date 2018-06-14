@@ -14,6 +14,7 @@ type Machine struct {
 	Hostname     string `json:"hostname"`
 	Uptime       int64  `json:"uptime"`
 	RunningSince int64  `json:"running_since"`
+	LastPing     int64  `json:"last_ping"`
 }
 
 // LoadMachine load and keep loading every 5 seconds to update the informations about it.
@@ -24,6 +25,7 @@ func LoadMachine(startTime time.Time) {
 			Hostname:     getHostname(),
 			Uptime:       getUptime(),                                      // In seconds
 			RunningSince: time.Since(startTime).Nanoseconds() / 1000000000, // In seconds
+			LastPing:     time.Now().Unix(),                                // In seconds
 		}
 
 		if err := SaveMachine(machine); err != nil {
