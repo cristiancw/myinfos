@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"math"
@@ -18,20 +19,41 @@ import (
 // Header to help to define the headers.
 type Header map[string]string
 
+var (
+	port   *int
+	dbhost *string
+	dbport *int
+)
+
 func main() {
-	go info.LoadMachine(time.Now())
+	log.Println("Starting 'myinfos'...")
+	log.Printf("Base url: http://localhost:%d\n", *port)
 
 	startServer()
 }
 
+func init() {
+	port = flag.Int("p", 8888, "Port number")
+	dbhost = flag.String("dbh", "localhost", "Cassandra ip address")
+	dbport = flag.Int("dbp", 9042, "Cassandra port number")
+	flag.Parse()
+}
+
 func startServer() {
+	info.InitDatabase(*dbhost, *dbport)
+
+	go info.LoadMachine(time.Now())
+
 	router := mux.NewRouter()
+	log.Println("Routs: ")
+
 	// Rest endpoints
 	router.HandleFunc("/myinfos", getMachines).Methods("GET")
+	log.Printf("    http://localhost:%d/myinfos\n", *port)
 
 	http.Handle("/", router)
 
-	log.Fatal(http.ListenAndServe(":8888", nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
 }
 
 func getMachines(w http.ResponseWriter, r *http.Request) {
@@ -47,9 +69,11 @@ func getMachines(w http.ResponseWriter, r *http.Request) {
 	} else {
 		accept := r.Header.Get("Accept")
 		if strings.Contains(accept, "text/html") {
+			log.Println("Get the machine list using 'text/html'")
 			html := createHTMLPage(machines)
 			response(w, http.StatusOK, Header{"Content-Type": "text/html"}, html)
 		} else {
+			log.Println("Get the machine list using 'application/json'")
 			response(w, http.StatusOK, Header{"Content-Type": "application/json"}, string(json))
 		}
 	}

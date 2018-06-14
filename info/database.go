@@ -11,14 +11,23 @@ import (
 
 const keyspaceName = "myinfos"
 
-var cluster *gocql.ClusterConfig
+var (
+	cluster *gocql.ClusterConfig
+	host    string
+	port    int
+)
 
-func init() {
+// InitDatabase the access of database.
+func InitDatabase(dbhost string, dbport int) {
+	log.Printf("Connecting to Cassandra database in: %s:%d\n", dbhost, dbport)
+	host = dbhost
+	port = dbport
+
 	var err error
 	err = createKeyspace()
 	if err == nil {
-		cluster = gocql.NewCluster("127.0.0.1")
-		cluster.Port = 9042
+		cluster = gocql.NewCluster(host)
+		cluster.Port = port
 		cluster.ProtoVersion = 4
 		cluster.Keyspace = keyspaceName
 
@@ -38,6 +47,8 @@ func GetMachines() ([]Machine, error) {
 		return nil, err
 	}
 
+	log.Println("Getting a list of machines...")
+
 	machines := make([]Machine, 0)
 
 	var ipAddress, hostname string
@@ -53,6 +64,10 @@ func GetMachines() ([]Machine, error) {
 		}
 		machines = append(machines, machine)
 	}
+
+	log.Printf("Machines:\n%v\n", machines)
+	log.Println("Getting a list of machines...Okay")
+
 	return machines, nil
 }
 
@@ -69,13 +84,14 @@ func SaveMachine(machine Machine) error {
 		return errJ
 	}
 
+	log.Printf("Saving the machine info:%v\n", machine)
 	err = session.Query("INSERT INTO host JSON ?", string(json)).Exec()
 	return err
 }
 
 func createKeyspace() error {
-	clusterTemp := gocql.NewCluster("127.0.0.1")
-	clusterTemp.Port = 9042
+	clusterTemp := gocql.NewCluster(host)
+	clusterTemp.Port = port
 	clusterTemp.ProtoVersion = 4
 	clusterTemp.Keyspace = "system"
 
@@ -85,15 +101,19 @@ func createKeyspace() error {
 		return err
 	}
 
+	log.Println("Checking the keyspace...")
+
 	count := 0
 	session.Query("SELECT count(1) as count FROM system_schema.keyspaces WHERE  keyspace_name = ? LIMIT 1", keyspaceName).Scan(&count)
 	if count == 0 {
+		log.Printf("    Looks like first access, creating the keyspace '%s'\n", keyspaceName)
 		cmd := fmt.Sprintf("CREATE KEYSPACE IF NOT EXISTS %s WITH REPLICATION = {'class' : 'SimpleStrategy','replication_factor' : 1}", keyspaceName)
 		err = session.Query(cmd).Exec()
 		if err != nil {
 			return err
 		}
 	}
+	log.Println("Checking the keyspace...Okay")
 	return nil
 }
 
@@ -110,7 +130,10 @@ func checkDatabase() error {
 		return err
 	}
 
+	log.Println("Checking the tables...")
+
 	if _, exists := metadata.Tables["host"]; !exists {
+		log.Println("    Looks like the table 'host' not exist yet. Creating the table...")
 		cmd := fmt.Sprintf(`CREATE TABLE %s.host (
 				ip_address text PRIMARY KEY,
 				hostname text,
@@ -123,5 +146,6 @@ func checkDatabase() error {
 		}
 	}
 
+	log.Println("Checking the tables...Okay")
 	return nil
 }

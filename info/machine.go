@@ -32,6 +32,7 @@ func LoadMachine(startTime time.Time) {
 			log.Fatal(err)
 		}
 
+		log.Printf("Refresh the machine info: %v\n", machine)
 		time.Sleep(5 * time.Second)
 	}
 }
