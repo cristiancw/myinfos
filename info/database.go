@@ -52,15 +52,14 @@ func GetMachines() ([]Machine, error) {
 	machines := make([]Machine, 0)
 
 	var ipAddress, hostname string
-	var uptime, runningSince, lastPing int64
-	iter := session.Query("SELECT ip_address, hostname, uptime, running_since, last_ping FROM myinfos.host").Iter()
-	for iter.Scan(&ipAddress, &hostname, &uptime, &runningSince, &lastPing) {
+	var uptime, lastPing int64
+	iter := session.Query("SELECT ip_address, hostname, uptime, last_ping FROM myinfos.host").Iter()
+	for iter.Scan(&ipAddress, &hostname, &uptime, &lastPing) {
 		machine := Machine{
-			IPAddress:    ipAddress,
-			Hostname:     hostname,
-			Uptime:       uptime,
-			RunningSince: runningSince,
-			LastPing:     lastPing,
+			IPAddress: ipAddress,
+			Hostname:  hostname,
+			Uptime:    uptime,
+			LastPing:  lastPing,
 		}
 		machines = append(machines, machine)
 	}
@@ -138,7 +137,6 @@ func checkDatabase() error {
 				ip_address text PRIMARY KEY,
 				hostname text,
 				uptime varint,
-				running_since varint,
 				last_ping varint,
 			) WITH comment='List of hosts with the uptime machine and uptime of application'`, keyspaceName)
 		if err = session.Query(cmd).Exec(); err != nil {

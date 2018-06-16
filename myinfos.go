@@ -124,14 +124,12 @@ func table(machines []info.Machine) string {
 		} else {
 			buffer.WriteString("<td style=\"padding:10px; margin:10px; background:#ccffdd;\">")
 		}
-		buffer.WriteString(machine.Hostname)
-		buffer.WriteString("<hr>")
-		buffer.WriteString("Ip address: ")
 		buffer.WriteString(machine.IPAddress)
+		buffer.WriteString("<hr>")
+		buffer.WriteString("Hostname: ")
+		buffer.WriteString(machine.Hostname)
 		buffer.WriteString("<br>OS uptime: ")
 		buffer.WriteString(formatTime(machine.Uptime))
-		buffer.WriteString("<br>Run since: ")
-		buffer.WriteString(formatTime(machine.RunningSince))
 		buffer.WriteString("<br>Last Ping: ")
 		buffer.WriteString(fmt.Sprintf("%d s", online))
 		buffer.WriteString("</td>")
