@@ -33,9 +33,9 @@ func main() {
 }
 
 func init() {
-	port = flag.Int("p", 8888, "Port number")
-	dbhost = flag.String("dbh", "localhost", "Cassandra ip address")
-	dbport = flag.Int("dbp", 9042, "Cassandra port number")
+	port = flag.Int("port", 8080, "Port number")
+	dbhost = flag.String("hostdb", "localhost", "Cassandra ip address")
+	dbport = flag.Int("portdb", 9042, "Cassandra port number")
 	flag.Parse()
 }
 
