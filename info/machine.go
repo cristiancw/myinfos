@@ -19,7 +19,7 @@ type Machine struct {
 func LoadMachine(startTime time.Time) {
 	for {
 		machine := Machine{
-			IPAddress: getIP(),
+			IPAddress: GetLocalIP(),
 			Hostname:  getHostname(),
 			Uptime:    time.Since(startTime).Nanoseconds() / 1000000000, // In seconds
 			LastPing:  time.Now().Unix(),                                // In seconds
@@ -34,7 +34,8 @@ func LoadMachine(startTime time.Time) {
 	}
 }
 
-func getIP() string {
+// GetLocalIP get local ip address.
+func GetLocalIP() string {
 	conn, err := net.Dial("udp", "8.8.8.8:80") // google address
 	if err != nil {
 		log.Fatal(err)

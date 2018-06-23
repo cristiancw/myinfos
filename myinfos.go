@@ -20,21 +20,23 @@ import (
 type Header map[string]string
 
 var (
+	host   string
 	port   *int
 	dbhost *string
 	dbport *int
 )
 
 func main() {
+	host = info.GetLocalIP()
 	log.Println("Starting 'myinfos'...")
-	log.Printf("Base url: http://localhost:%d\n", *port)
+	log.Printf("Base url: http://%s:%d\n", host, *port)
 
 	startServer()
 }
 
 func init() {
 	port = flag.Int("port", 8080, "Port number")
-	dbhost = flag.String("hostdb", "localhost", "Cassandra ip address")
+	dbhost = flag.String("hostdb", host, "Cassandra ip address")
 	dbport = flag.Int("portdb", 9042, "Cassandra port number")
 	flag.Parse()
 }
@@ -49,7 +51,7 @@ func startServer() {
 
 	// Rest endpoints
 	router.HandleFunc("/myinfos", getMachines).Methods("GET")
-	log.Printf("    http://localhost:%d/myinfos\n", *port)
+	log.Printf("    http://%s:%d/myinfos\n", host, *port)
 
 	http.Handle("/", router)
 
