@@ -121,7 +121,7 @@ func table(machines []info.Machine) string {
 		}
 
 		i++
-		if online > 10 {
+		if online > 60 {
 			buffer.WriteString("<td style=\"padding:10px; margin:10px; background:#ffcccc;\">")
 		} else {
 			buffer.WriteString("<td style=\"padding:10px; margin:10px; background:#ccffdd;\">")
