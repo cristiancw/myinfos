@@ -69,7 +69,8 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cl
 EOF
     yum install -y kubelet kubeadm kubectl kubernetes-cni bash-completion
     systemctl enable kubelet && systemctl start kubelet
-    echo "source <(kubectl completion bash)" >> ~/.bashrc
+    echo "source <(kubeadm completion bash)" >> ~/.bashrc
+    echo "source <(kubectl completion bash)" >> ~/.bashrc    
 }
 
 ##############
