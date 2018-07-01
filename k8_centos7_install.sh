@@ -45,7 +45,7 @@ EOF
 #
 # Output:
 function installDocker() {
-    logit "Installing the docker..."
+    logit "Installing docker..."
     yum install -y docker
     systemctl enable docker && systemctl start docker 
 }
@@ -57,7 +57,7 @@ function installDocker() {
 #
 # Output:
 function installK8() {
-    logit "Installing the kubernetes..."
+    logit "Installing kubernetes..."
     cat <<EOF > /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
@@ -76,8 +76,10 @@ EOF
 #### MAIN ####
 ##############
 
+logit "Starting to install..."
 prepareEnviroment
 installDocker
 installK8
+logit "Done."
 
 exit 0
